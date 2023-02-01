@@ -1,4 +1,7 @@
 #!/bin/bash
+
+# yifengyou: 打开全局调试，默认不建议打开，信息太大
+# set -x
 #
 # Copyright (c) 2013-2021 Igor Pecovnik, igor.pecovnik@gma**.com
 #
@@ -13,9 +16,12 @@
 # use configuration files like config-default.conf to set the build configuration
 # check Armbian documentation https://docs.armbian.com/ for more info
 
+# yifengyou: realpath 获取给定文件/目录的绝对路径
+# yifengyou: dirname 获取给定文件/目录的父路径
 SRC="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 
 # check for whitespace in ${SRC} and exit for safety reasons
+# yifengyou: 匹配空格
 grep -q "[[:space:]]" <<< "${SRC}" && {
 	echo "\"${SRC}\" contains whitespace. Not supported. Aborting." >&2
 	exit 1
@@ -24,7 +30,7 @@ grep -q "[[:space:]]" <<< "${SRC}" && {
 cd "${SRC}" || exit
 
 if [[ -f "${SRC}"/lib/import-functions.sh ]]; then
-
+	# yifengyou: 工作目录已经存在.git目录，就会出现这个问题，其实是git安全加固，此处直接简单粗暴绕过
 	# Declare this folder as safe
 	if ! grep -q "directory = \*" "$HOME/.gitconfig" 2> /dev/null; then
 		git config --global --add safe.directory "*"
@@ -41,4 +47,5 @@ else
 
 fi
 
+# lib\functions\cli\cli-entrypoint.sh
 cli_entrypoint "$@"

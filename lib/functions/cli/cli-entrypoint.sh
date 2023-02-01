@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
+
+# yifengyou: compile.sh 跳转到这里执行
 function cli_entrypoint() {
 	if [[ "${ARMBIAN_ENABLE_CALL_TRACING}" == "yes" ]]; then
+	  # -T  If set, the DEBUG and RETURN traps are inherited by shell functions.
 		set -T # inherit return/debug traps
 		mkdir -p "${SRC}"/output/debug
 		echo -n "" > "${SRC}"/output/debug/calls.txt
@@ -10,7 +13,7 @@ function cli_entrypoint() {
 	check_args "$@"
 
 	do_update_src
-
+  # 要求root权限
 	if [[ "${EUID}" == "0" ]] || [[ "${1}" == "vagrant" ]]; then
 		:
 	elif [[ "${1}" == docker || "${1}" == dockerpurge || "${1}" == docker-shell ]] && grep -q "$(whoami)" <(getent group docker); then
@@ -39,6 +42,7 @@ function cli_entrypoint() {
 	handle_vagrant "$@"
 
 	# Purge Armbian Docker images
+	# yifengyou: 清理armbian docker构建镜像后重新制作
 	if [[ "${1}" == dockerpurge && -f /etc/debian_version ]]; then
 		display_alert "Purging Armbian Docker containers" "" "wrn"
 		docker container ls -a | grep armbian | awk '{print $1}' | xargs docker container rm &> /dev/null
@@ -55,6 +59,7 @@ function cli_entrypoint() {
 		set -- "docker" "$@"
 	fi
 
+  # 检查docker环境
 	handle_docker "$@"
 
 	prepare_userpatches

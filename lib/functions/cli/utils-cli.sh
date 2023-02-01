@@ -110,6 +110,7 @@ function handle_docker() {
 		sudo bash -c "curl -fsSL \"https://download.docker.com/linux/${codeid}/gpg\" | apt-key add -qq - > /dev/null 2>&1 "
 		export DEBIAN_FRONTEND=noninteractive
 		sudo apt-get update
+		# 安装docker环境
 		sudo apt-get install -y -qq --no-install-recommends ${DOCKER_BINARY}
 		display_alert "Add yourself to docker group to avoid root privileges" "" "wrn"
 		"${SRC}/compile.sh" "$@"
@@ -120,6 +121,7 @@ function handle_docker() {
 
 function prepare_userpatches() {
 	# Create userpatches directory if not exists
+	# 创建用户patches内容，如果没有则创建
 	mkdir -p "${SRC}"/userpatches
 
 	# Create example configs if none found in userpatches

@@ -83,7 +83,8 @@ waiter_local_git() {
 	mkdir -p $work_dir
 	cd $work_dir || exit_with_error
 
-	display_alert "Checking git sources" "$dir $url$name/$branch" "info"
+  display_alert "Checking git sources" "url:$url" "info"
+	display_alert "Checking git sources" "dir:$dir branch:$url$name/$branch" "info"
 
 	if [ "$(git rev-parse --git-dir 2> /dev/null)" != ".git" ]; then
 		git init -q .
@@ -207,7 +208,8 @@ fetch_from_repo() {
 		local ref_name=${ref##*:}
 	fi
 
-	display_alert "Checking git sources" "$dir $ref_name" "info"
+	display_alert "Checking git sources" "url:$url" "info"
+	display_alert "Checking git sources" "dir:$dir ref:$ref_name" "info"
 
 	# get default remote branch name without cloning
 	# local ref_name=$(git ls-remote --symref $url HEAD | grep -o 'refs/heads/\S*' | sed 's%refs/heads/%%')
@@ -283,7 +285,7 @@ fetch_from_repo() {
 	if [[ $changed == true ]]; then
 
 		# remote was updated, fetch and check out updates
-		display_alert "Fetching updates"
+		display_alert "Fetching updates $url"
 		case $ref_type in
 			branch) improved_git fetch --depth 200 origin "${ref_name}" ;;
 			tag) improved_git fetch --depth 200 origin tags/"${ref_name}" ;;
