@@ -7,12 +7,13 @@ function prepare_and_config_main_build_single() {
 	umask 002
 
 	# destination
+	# 如果配置目录有output子目录，则会放在配置目录的output中
 	if [ -d "$CONFIG_PATH/output" ]; then
 		DEST="${CONFIG_PATH}"/output
 	else
 		DEST="${SRC}"/output
 	fi
-	
+
 	# yifengyou: lib/functions/configuration/interactive.sh
 	interactive_config_prepare_terminal
 

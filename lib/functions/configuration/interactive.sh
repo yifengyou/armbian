@@ -9,6 +9,7 @@ function interactive_config_prepare_terminal() {
 	fi
 
 	# We'll use this title on all menus
+	# yifengyou: dialog 开头显示的内容
 	backtitle="Armbian building script, https://www.armbian.com | https://docs.armbian.com | (c) 2013-2021 Igor Pecovnik "
 }
 
