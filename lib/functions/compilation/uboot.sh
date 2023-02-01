@@ -87,7 +87,6 @@ compile_uboot() {
 		# yifengyou
 		display_alert "== u-boot make " "$BOOTCONFIG" "info"
 		echo -e "\n\t== u-boot make $BOOTCONFIG ==\n" >> "${DEST}"/${LOG_SUBPATH}/compilation.log
-		set -x
 		eval CCACHE_BASEDIR="$(pwd)" env PATH="${toolchain}:${toolchain2}:${PATH}" \
 			'make $CTHREADS $BOOTCONFIG \
 			CROSS_COMPILE="$CCACHE $UBOOT_COMPILER"' \

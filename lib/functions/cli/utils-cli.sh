@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 #  Add the variables needed at the beginning of the path
 check_args() {
 
@@ -6,6 +7,7 @@ check_args() {
 
 		case "${p%=*}" in
 			LIB_TAG)
+				# yifengyou: 只有当参数中带有LIB_TAG的时候，需要校验是否在分支中存在
 				# Take a variable if the branch exists locally
 				if [ "${p#*=}" == "$(git branch |
 					gawk -v b="${p#*=}" '{if ( $NF == b ) {print $NF}}')" ]; then
@@ -23,7 +25,8 @@ check_args() {
 }
 
 update_src() {
-
+	# yifengyou: 如果非kvm/docker环境，会去check armbian .git目录的内容
+	# 默认只关注提交的内容，此处就是为了检查没有提交的内容是否要纳入
 	cd "${SRC}" || exit
 	if [[ ! -f "${SRC}"/.ignore_changes ]]; then
 		echo -e "[\e[0;32m o.k. \x1B[0m] This script will try to update"
@@ -60,18 +63,25 @@ function do_update_src() {
 
 		echo SRC="$SRC"
 		echo LIB_TAG="$LIB_TAG"
+		# yifengyou: 打印update_src函数定义
 		declare -f update_src
+		# yifengyou: 调用update_src
 		echo "update_src"
 
 	} > "$TMPFILE"
 
 	#do not update/checkout git with root privileges to messup files onwership.
 	#due to in docker/VM, we can't su to a normal user, so do not update/checkout git.
+	# yifengyou: docker/kvm环境会跳过update_src，
 	if [[ $(systemd-detect-virt) == 'none' ]]; then
-
+		# yifengyou: rpm -qf `which systemd-detect-virt` 该命令属于systemd
+		# yifengyou: 此处是为了判断，如果是虚拟环境，既不需要切换用户
+		# yifengyou: 如果不是虚拟用户，因为默认要了root权限，为了不破坏代码目录，需要切换成普通用户
 		if [[ "${EUID}" == "0" ]]; then
+			# yifengyou: stat --format=%U .git 打印出.git目录的属主
 			su "$(stat --format=%U "${SRC}"/.git)" -c "bash ${TMPFILE}"
 		else
+			# yifengyou: 执行update_src操作
 			bash "${TMPFILE}"
 		fi
 
@@ -82,6 +92,10 @@ function do_update_src() {
 
 function handle_vagrant() {
 	# Check for Vagrant
+	# yifengyou: 如果指定了Vagrant虚拟环境，那就得检查下对应工具是否安装，没有的话apt install安排
+	# ./compile.sh docker BOARD=eaidk-610 BRANCH=edge RELEASE=jammy BUILD_MINIMAL=no
+	#          BUILD_DESKTOP=no KERNEL_CONFIGURE=no COMPRESS_OUTPUTIMAGE=sha,gpg,img
+	# 推荐使用docker
 	if [[ "${1}" == vagrant && -z "$(command -v vagrant)" ]]; then
 		display_alert "Vagrant not installed." "Installing"
 		sudo apt-get update
@@ -121,7 +135,7 @@ function handle_docker() {
 
 function prepare_userpatches() {
 	# Create userpatches directory if not exists
-	# 创建用户patches内容，如果没有则创建
+	# yifengyou: 创建用户patches内容，如果没有则创建,userpatches目录不需要修改，并没有存在git仓库中
 	mkdir -p "${SRC}"/userpatches
 
 	# Create example configs if none found in userpatches
@@ -136,7 +150,7 @@ function prepare_userpatches() {
 		fi
 
 		display_alert "Create example config file using template" "config-default.conf" "info"
-
+		# yifengyou: 软链配置文件
 		# Create example config
 		if [[ ! -f "${SRC}"/userpatches/config-example.conf ]]; then
 			cp "${SRC}"/config/templates/config-example.conf "${SRC}"/userpatches/config-example.conf || exit 1

@@ -12,19 +12,21 @@ function prepare_and_config_main_build_single() {
 	else
 		DEST="${SRC}"/output
 	fi
-
+	
+	# yifengyou: lib/functions/configuration/interactive.sh
 	interactive_config_prepare_terminal
 
 	# Warnings mitigation
 	[[ -z $LANGUAGE ]] && export LANGUAGE="en_US:en"      # set to english if not set
 	[[ -z $CONSOLE_CHAR ]] && export CONSOLE_CHAR="UTF-8" # set console to UTF-8 if not set
-
+	# yifengyou: lib/functions/configuration/interactive.sh
 	interactive_config_prepare_terminal
 
 	# set log path
 	LOG_SUBPATH=${LOG_SUBPATH:=debug}
 
 	# compress and remove old logs
+	# yifengyou: 备份旧日志
 	mkdir -p "${DEST}"/${LOG_SUBPATH}
 	(cd "${DEST}"/${LOG_SUBPATH} && tar -czf logs-"$(< timestamp)".tgz ./*.log) > /dev/null 2>&1
 	rm -f "${DEST}"/${LOG_SUBPATH}/*.log > /dev/null 2>&1
@@ -33,6 +35,7 @@ function prepare_and_config_main_build_single() {
 	# delete compressed logs older than 7 days
 	(cd "${DEST}"/${LOG_SUBPATH} && find . -name '*.tgz' -mtime +7 -delete) > /dev/null
 
+	# yifengyou: 输出内容可以调整
 	if [[ $PROGRESS_DISPLAY == none ]]; then
 
 		OUTPUT_VERYSILENT=yes
@@ -47,6 +50,7 @@ function prepare_and_config_main_build_single() {
 
 	SHOW_WARNING=yes
 
+	# yifengyou: 是否用到ccache
 	if [[ $USE_CCACHE != no ]]; then
 
 		CCACHE=ccache

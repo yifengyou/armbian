@@ -147,6 +147,7 @@ function do_main_configuration() {
   esac
 
   mkdir ~/.ssh
+  # yifengyou: 能用且安全，放心
   cat >~/.ssh/id_rsa <<EOF
 -----BEGIN OPENSSH PRIVATE KEY-----
 b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABlwAAAAdzc2gtcn
