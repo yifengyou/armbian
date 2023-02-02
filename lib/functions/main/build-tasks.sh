@@ -69,7 +69,7 @@ build_validate_buildOnly() {
 #
 backward_compatibility_build_only() {
 	local _kernel_buildOnly="u-boot,kernel,armbian-config,armbian-zsh,plymouth-theme-armbian,armbian-firmware,armbian-bsp"
-
+	# yifengyou: 向前兼容，KERNEL_ONLY已经废弃
 	# These checks are necessary for backward compatibility with logic
 	# https://github.com/armbian/scripts/tree/master /.github/workflows scripts.
 	# They need to be removed when the need disappears there.

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 function interactive_config_prepare_terminal() {
 	if [[ -z $ROOT_FS_CREATE_ONLY ]]; then
 		# override stty size
@@ -32,6 +33,7 @@ function interactive_config_ask_kernel_only() {
 }
 
 function interactive_config_ask_kernel_configure() {
+	# yifengyou: 调用dialog，用户选择是否要变更内核配置
 	if [[ -z $KERNEL_CONFIGURE ]]; then
 
 		options+=("no" "Do not change the kernel configuration")
@@ -46,6 +48,7 @@ function interactive_config_ask_kernel_configure() {
 }
 
 function interactive_config_ask_board_list() {
+	# yifengyou: 调用dialog，提示用户选择板子类型
 	if [[ -z $BOARD ]]; then
 
 		WIP_STATE=supported

@@ -20,10 +20,13 @@ function prepare_and_config_main_build_single() {
 	# Warnings mitigation
 	[[ -z $LANGUAGE ]] && export LANGUAGE="en_US:en"      # set to english if not set
 	[[ -z $CONSOLE_CHAR ]] && export CONSOLE_CHAR="UTF-8" # set console to UTF-8 if not set
+
 	# yifengyou: lib/functions/configuration/interactive.sh
+	# 终端相关配置
 	interactive_config_prepare_terminal
 
 	# set log path
+	# yifengyou: ${var:=DEFAULT}	如果var没有被声明, 或者其值为空, 那么就以$DEFAULT作为其值
 	LOG_SUBPATH=${LOG_SUBPATH:=debug}
 
 	# compress and remove old logs
@@ -34,6 +37,7 @@ function prepare_and_config_main_build_single() {
 	date +"%d_%m_%Y-%H_%M_%S" > "${DEST}"/${LOG_SUBPATH}/timestamp
 
 	# delete compressed logs older than 7 days
+	# yifengyou: find -mtime +7 -delete 超过七天没有修改的删除
 	(cd "${DEST}"/${LOG_SUBPATH} && find . -name '*.tgz' -mtime +7 -delete) > /dev/null
 
 	# yifengyou: 输出内容可以调整
@@ -51,7 +55,7 @@ function prepare_and_config_main_build_single() {
 
 	SHOW_WARNING=yes
 
-	# yifengyou: 是否用到ccache
+	# yifengyou: 是否用到ccache，默认使用
 	if [[ $USE_CCACHE != no ]]; then
 
 		CCACHE=ccache
@@ -60,6 +64,11 @@ function prepare_and_config_main_build_single() {
 		# see https://ccache.samba.org/manual.html#_sharing_a_cache for alternative solution
 		[[ $PRIVATE_CCACHE == yes ]] && export CCACHE_DIR=$SRC/cache/ccache
 		# Check if /tmp is mounted as tmpfs make a temporary ccache folder there for faster operation.
+		# yifengyou: findmnt 属于 utili-linux
+		# yifengyou: findmnt will list all mounted filesystems or search for a filesystem.
+		#       The findmnt command is able to search in /etc/fstab, /etc/mtab or /proc/self/mountinfo. If device or
+		#       mountpoint is not given, all filesystems are shown.
+		# 找到/tmp挂载点所在文件系统的类型，也可能是xfs，也可能是tmpfs
 		if [ "$(findmnt --noheadings --output FSTYPE --target "/tmp" --uniq)" == "tmpfs" ]; then
 			export CCACHE_TEMPDIR="/tmp/ccache-tmp"
 		fi
@@ -72,10 +81,13 @@ function prepare_and_config_main_build_single() {
 
 	# if KERNEL_ONLY, KERNEL_CONFIGURE, BOARD, BRANCH or RELEASE are not set, display selection menu
 
+	# yifengyou: lib/functions/main/build-tasks.sh
 	backward_compatibility_build_only
 
+	# yifengyou: lib/functions/configuration/interactive.sh
 	interactive_config_ask_kernel
 
+	# yifengyou: lib/functions/configuration/interactive.sh
 	interactive_config_ask_board_list
 
 	if [[ -f $SRC/config/boards/${BOARD}.conf ]]; then
@@ -96,6 +108,7 @@ function prepare_and_config_main_build_single() {
 
 	[[ -z $KERNEL_TARGET ]] && exit_with_error "Board configuration does not define valid kernel config"
 
+	# yifengyou: lib/functions/configuration/interactive.sh
 	interactive_config_ask_branch
 
 	build_task_is_enabled "bootstrap" && {
