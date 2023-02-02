@@ -60,6 +60,7 @@ cleaning() {
 			;;
 
 		sources) # delete output/sources and output/buildpkg
+			# yifengyou: 删除 cache/sources 目录
 			[[ -d "${SRC}"/cache/sources ]] && display_alert "Cleaning" "sources" "info" && rm -rf "${SRC}"/cache/sources/* "${DEST}"/buildpkg/*
 			;;
 

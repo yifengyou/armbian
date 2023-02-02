@@ -139,15 +139,12 @@ function prepare_and_config_main_build_single() {
 	do_main_configuration
 
 	# optimize build time with 100% CPU usage
+	# yifengyou: 为了避免CPU利用率接近100%，无法响应其他事件，做了限制。总得留点资源给其他进程用
 	CPUS=$(grep -c 'processor' /proc/cpuinfo)
 	if [[ $USEALLCORES != no ]]; then
-
 		CTHREADS="-j$((CPUS + CPUS / 2))"
-
 	else
-
 		CTHREADS="-j1"
-
 	fi
 
 	call_extension_method "post_determine_cthreads" "config_post_determine_cthreads" << 'POST_DETERMINE_CTHREADS'
@@ -155,6 +152,7 @@ function prepare_and_config_main_build_single() {
 Called early, before any compilation work starts.
 POST_DETERMINE_CTHREADS
 
+	# yifengyou: 是否为BETA测试版本，还是stab额稳定版本
 	if [[ "$BETA" == "yes" ]]; then
 		IMAGE_TYPE=nightly
 	elif [ "$BETA" == "no" ] || [ "$RC" == "yes" ]; then

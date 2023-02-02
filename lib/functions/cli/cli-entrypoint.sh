@@ -74,6 +74,8 @@ function cli_entrypoint() {
 		SHELL_ONLY=yes
 		# ./compile.sh docker-shell
 		# yifengyou: 这个命令很管用，可以进armbian docker构建环境调试
+		# yifengyou: 具体是什么时候进入shell？ 检索SHELL_ONLY变量
+		#  会source配置，config/templates/config-docker.conf，其实就是执行了这里的脚本
 		set -- "docker" "$@"
 	fi
 
@@ -126,6 +128,8 @@ function cli_entrypoint() {
 	# shellcheck source=/dev/null
 	source "${CONFIG_FILE}"
 	popd > /dev/null || exit
+	# yifengyou: 如果是config-docker.conf 环境， 运行到这里截止，不会运行后续
+
 
 	# yifengyou: 如果没有指定userpatches的路径，那么跟CONFIG_PATH保持一致
 	[[ -z "${USERPATCHES_PATH}" ]] && USERPATCHES_PATH="${CONFIG_PATH}"
@@ -148,9 +152,12 @@ function cli_entrypoint() {
 	# 关键点：日志备份、信息搜集，获取必要参数，准备开始编译。相当于原材料准备
 	prepare_and_config_main_build_single
 
+	# 如果参数都处理好了，则开始编译，否则重新跑一遍
 	if [[ -z $1 ]]; then
+		# yifengyou: lib/functions/main/build-tasks.sh
 		build_main
 	else
+		# yifengyou: 如果参数没有处理完，则会从重新跑一遍。真正进入构建环境的时候，所有参数都会被清空掉
 		eval "$@"
 	fi
 }

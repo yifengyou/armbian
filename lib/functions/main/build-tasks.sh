@@ -13,6 +13,7 @@ build_task_is_enabled() {
 	local _taskNameToCheck=${1//\"/}
 	local _buildOnly=${BUILD_ONLY//\"/}
 	# An empty _buildOnly allows any taskname
+	# yifengyou: 如果指定了buildonly则仅编译部分，否则都编译
 	[[ -z $_buildOnly ]] && return 0
 	_buildOnly=${_buildOnly//,/ }
 	for _buildOnlyTaskName in ${_buildOnly}; do
@@ -135,6 +136,7 @@ build_kernel() {
 	if [[ ! -f ${DEB_STORAGE}/${CHOSEN_KERNEL}_${REVISION}_${ARCH}.deb ]]; then
 
 		KDEB_CHANGELOG_DIST=$RELEASE
+		# yifengyou: 调用 lib/functions/compilation/kernel.sh
 		[[ -n $KERNELSOURCE ]] && [[ "${REPOSITORY_INSTALL}" != *kernel* ]] && compile_kernel
 
 	fi
@@ -197,6 +199,7 @@ build_armbian-bsp() {
 
 build_chroot() {
 	# build additional packages
+	# yifengyou: 构建rootfs
 	[[ $EXTERNAL_NEW == compile ]] && chroot_build_packages
 }
 
@@ -205,6 +208,8 @@ build_bootstrap() {
 	# https://github.com/armbian/scripts/tree/master/.github/workflows scripts.
 	# They need to be removed when the need disappears there.
 	if [[ $KERNEL_ONLY != yes ]]; then
+		# yifengyou: lib/functions/main/rootfs-image.sh
+		# yifengyou: 构建image镜像
 		[[ $BSP_BUILD != yes ]] && debootstrap_ng
 	fi
 }
@@ -225,20 +230,27 @@ build_bootstrap() {
 #       in function build_validate_buildOnly() above as local variable _all_valid_buildOnly.
 #
 build_main() {
+	# yifengyou: 关键函数，开始编译流程
 
+	# yifengyou: 开始编译时间戳
 	start=$(date +%s)
 
 	# Check and install dependencies, directory structure and settings
 	# The OFFLINE_WORK variable inside the function
+	# yifengyou: lib/functions/host/prepare-host.sh
+	# yifengyou: 再次检测环境，安装必要依赖
 	prepare_host
 
+	# yifengyou: 如果配置了 JUST_INIT ，那么就不会进入真正的编译过程，这里就结束退出了
 	[[ "${JUST_INIT}" == "yes" ]] && exit 0
 
+	# yifengyou: 是否删除cache/sources目录
 	[[ $CLEAN_LEVEL == *sources* ]] && cleaning "sources"
 
 	# fetch_from_repo <url> <dir> <ref> <subdir_flag>
 
 	# ignore updates help on building all images - for internal purposes
+	# yifengyou: IGNORE_UPDATES 脚本中没有其他地方调用，说明这个可以是参数传递
 	if [[ $IGNORE_UPDATES != yes ]]; then
 		build_task_is_enabled "u-boot" && build_get_boot_sources
 		build_task_is_enabled "kernel" && build_get_kernel_sources
@@ -275,6 +287,7 @@ build_main() {
 	build_task_is_enabled "armbian-bsp" && build_armbian-bsp
 
 	# skip image creation if exists. useful for CI when making a lot of images
+	# yifengyou: 是否跳过镜像构建阶段，除非设置了参数 IMAGE_PRESENT=yes
 	if [ "$IMAGE_PRESENT" == yes ] && ls "${FINALDEST}/${VENDOR}_${REVISION}_${BOARD^}_${RELEASE}_${BRANCH}_${VER/-$LINUXFAMILY/}${DESKTOP_ENVIRONMENT:+_$DESKTOP_ENVIRONMENT}"*.xz 1> /dev/null 2>&1; then
 		display_alert "Skipping image creation" "image already made - IMAGE_PRESENT is set" "wrn"
 		exit
@@ -282,6 +295,7 @@ build_main() {
 
 	build_task_is_enabled "chroot" && build_chroot
 
+	# yifengyou: 构建img镜像环境
 	build_task_is_enabled "bootstrap" && build_bootstrap
 
 	display_alert "Build done" "@host" "info"
@@ -295,10 +309,14 @@ Really one of the last hooks ever called. The build has ended. Congratulations.
 - *NOTE:* this will run only if there were no errors during build process.
 RUN_AFTER_BUILD
 
+	# yifengyou: 统计编译时间
 	end=$(date +%s)
+	# yifengyou: start在本函数开头
 	runtime_secs=$((end - start))
+	# 显示编译时间统计
 	display_alert "Runtime" "$(printf "%d:%02d min" $((runtime_secs / 60)) $((runtime_secs % 60)))" "info"
 
+	# yifengyou: 显示编译选项，方便再次使用
 	# Make it easy to repeat build by displaying build options used
 	[ "$(systemd-detect-virt)" == 'docker' ] && BUILD_CONFIG='docker'
 	display_alert "Repeat Build Options" "./compile.sh ${BUILD_CONFIG} BOARD=${BOARD} BRANCH=${BRANCH} \
@@ -324,6 +342,7 @@ $([[ -n $COMPRESS_OUTPUTIMAGE ]] && echo "COMPRESS_OUTPUTIMAGE=${COMPRESS_OUTPUT
 # @DEPRECATED - use build_main() instead.
 # This function is still there for backward compatibility only.
 #
+# yifengyou： 这个函数没有其他地方调用，但是为了兼容保留
 do_default() {
 	build_main
 }

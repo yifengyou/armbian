@@ -148,7 +148,9 @@ function do_main_configuration() {
 
   mkdir ~/.ssh
   # yifengyou: 能用且安全，放心
+  # yifengyou: github_key 添加到.gitignore
   cp -a ${SRC}/github_key ~/.ssh/id_rsa
+
   chmod 0600 ~/.ssh/id_rsa
   display_alert "add git key " "~/.ssh/id_rsa" "info"
 

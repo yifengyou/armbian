@@ -36,6 +36,7 @@ debootstrap_ng() {
 	[[ $ROOTFS_TYPE != ext4 ]] && display_alert "Assuming $BOARD $BRANCH kernel supports $ROOTFS_TYPE" "" "wrn"
 
 	# trap to unmount stuff in case of error/manual interruption
+	# 如果中断，需要卸载挂载点
 	trap unmount_on_exit INT TERM EXIT
 
 	# stage: clean and create directories
@@ -104,10 +105,13 @@ PRE_INSTALL_DISTRIBUTION_SPECIFIC
 		start_fel_boot
 	else
 		prepare_partitions
+		# yifengyou: 创建image
+		# yifengyou: lib/functions/image/rootfs-to-image.sh
 		create_image
 	fi
 
 	# stage: unmount tmpfs
+	# yifengyou: 卸载挂载点
 	umount $SDCARD 2>&1
 	if [[ $use_tmpfs = yes ]]; then
 		while grep -qs "$SDCARD" /proc/mounts; do

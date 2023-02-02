@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
+
+# yifengyou: 内核编译函数，关键
 compile_kernel() {
 	if [[ $CLEAN_LEVEL == *make* ]]; then
 		display_alert "Cleaning" "$LINUXSOURCEDIR" "info"
 		(
 			cd "${SRC}/cache/sources/${LINUXSOURCEDIR}"
+			display_alert "yifengyou: " "make ARCH=${ARCHITECTURE} clean" "info"
 			make ARCH="${ARCHITECTURE}" clean > /dev/null 2>&1
 		)
 	fi
@@ -102,8 +105,14 @@ CUSTOM_KERNEL_CONFIG
 				'make ARCH=$ARCHITECTURE CROSS_COMPILE="$CCACHE $KERNEL_COMPILER" olddefconfig'
 		fi
 	else
+
+		echo "yifengyou: CCACHE_BASEDIR=$(pwd) env PATH=${toolchain}:${PATH} " \
+			"make $CTHREADS ARCH=$ARCHITECTURE CROSS_COMPILE=$CCACHE $KERNEL_COMPILER oldconfig"
 		eval CCACHE_BASEDIR="$(pwd)" env PATH="${toolchain}:${PATH}" \
 			'make $CTHREADS ARCH=$ARCHITECTURE CROSS_COMPILE="$CCACHE $KERNEL_COMPILER" oldconfig'
+
+		echo "yifengyou: CCACHE_BASEDIR=$(pwd) env PATH=${toolchain}:${PATH}" \
+			"make $CTHREADS ARCH=$ARCHITECTURE CROSS_COMPILE=$CCACHE $KERNEL_COMPILER ${KERNEL_MENUCONFIG:-menuconfig}"
 		eval CCACHE_BASEDIR="$(pwd)" env PATH="${toolchain}:${PATH}" \
 			'make $CTHREADS ARCH=$ARCHITECTURE CROSS_COMPILE="$CCACHE $KERNEL_COMPILER" ${KERNEL_MENUCONFIG:-menuconfig}'
 
