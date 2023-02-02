@@ -87,7 +87,7 @@ function interactive_desktop_main_configuration() {
 		if [[ "${options[0]}" == "" ]]; then
 			exit_with_error "No desktop environment seems to be available for your board ${BOARD} (ARCH : ${ARCH} - EXPERT : ${EXPERT})"
 		fi
-
+		# yifengyou: 选择图形界面环境类型
 		DESKTOP_ENVIRONMENT=$(show_menu "Choose a desktop environment" "$backtitle" "Select the default desktop environment to bundle with this image" "${options[@]}")
 
 		unset options
@@ -139,6 +139,7 @@ function interactive_desktop_main_configuration() {
 	# "-z ${VAR+x}" allows to check for unset variable
 	# Technically, someone might want to build a desktop with no additional
 	# appgroups.
+	# yifengyou: 添加扩展软件包
 	if [[ $BUILD_DESKTOP == "yes" && -z ${DESKTOP_APPGROUPS_SELECTED+x} ]]; then
 
 		options=()
