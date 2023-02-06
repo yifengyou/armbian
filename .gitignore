@@ -1,5 +1,6 @@
 github_key
 
+/log.*
 ### Specific to building Armbian ###
 /.vagrant/
 ubuntu-*-cloudimg-console.log
