@@ -31,3 +31,6 @@ edge:
         KERNEL_CONFIGURE=no \
         COMPRESS_OUTPUTIMAGE=sha,gpg,img | tee log.eaidk610-kernel6
 
+
+status:
+	docker ps -a

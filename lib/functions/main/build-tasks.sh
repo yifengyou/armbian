@@ -332,7 +332,12 @@ $([[ -n $DESKTOP_APPGROUPS_SELECTED ]] && echo "DESKTOP_APPGROUPS_SELECTED=\"${D
 $([[ -n $DESKTOP_APT_FLAGS_SELECTED ]] && echo "DESKTOP_APT_FLAGS_SELECTED=\"${DESKTOP_APT_FLAGS_SELECTED}\" ")\
 $([[ -n $COMPRESS_OUTPUTIMAGE ]] && echo "COMPRESS_OUTPUTIMAGE=${COMPRESS_OUTPUTIMAGE} ")\
 " "ext"
-
+	# yifengyou: hook docker build exit
+	if [ -f /.dockerenv ] ; then
+		echo "yifengyou: Finished build. Enter bash shell"
+		cd /root/armbian
+		exec /bin/bash
+	fi
 }
 
 ################################################################

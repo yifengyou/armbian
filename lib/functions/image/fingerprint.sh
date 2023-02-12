@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
+
 #--------------------------------------------------------------------------------------------------------------------------------
 # fingerprint_image <out_txt_file> [image_filename]
 # Saving build summary to the image
 #--------------------------------------------------------------------------------------------------------------------------------
 fingerprint_image() {
+	# yifengyou: 打印img说明文档，例如 Armbian_23.02.0-trunk_Eaidk-610_jammy_edge_6.1.10_gnome_desktop.img.txt
 	cat <<- EOF > "${1}"
 		--------------------------------------------------------------------------------
 		Title:           ${VENDOR} $REVISION ${BOARD^} $BRANCH
