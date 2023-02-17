@@ -608,7 +608,9 @@ FAMILY_TWEAKS
 
 	# disable MOTD for first boot - we want as clean 1st run as possible
 	chmod -x "${SDCARD}"/etc/update-motd.d/*
-
+	# yifengyou: cat armbianEnv.txt
+	echo "yifengyou: cat armbianEnv.txt"
+	cat "${SDCARD}"/boot/armbianEnv.txt || :
 }
 
 install_rclocal() {

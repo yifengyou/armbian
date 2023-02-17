@@ -97,10 +97,12 @@ CUSTOM_KERNEL_CONFIG
 
 	if [[ $KERNEL_CONFIGURE != yes ]]; then
 		if [[ $BRANCH == default ]]; then
+			display_alert "yifengyou: " "make ARCH=$ARCHITECTURE CROSS_COMPILE=$CCACHE $KERNEL_COMPILER silentoldconfig" "info"
 			eval CCACHE_BASEDIR="$(pwd)" env PATH="${toolchain}:${PATH}" \
 				'make ARCH=$ARCHITECTURE CROSS_COMPILE="$CCACHE $KERNEL_COMPILER" silentoldconfig'
 		else
 			# TODO: check if required
+			display_alert "yifengyou: " "make ARCH=$ARCHITECTURE CROSS_COMPILE=$CCACHE $KERNEL_COMPILER olddefconfig" "info"
 			eval CCACHE_BASEDIR="$(pwd)" env PATH="${toolchain}:${PATH}" \
 				'make ARCH=$ARCHITECTURE CROSS_COMPILE="$CCACHE $KERNEL_COMPILER" olddefconfig'
 		fi

@@ -74,26 +74,26 @@ advanced_patch() {
 		done
 	done
   # 打补丁后，强行修改内容，不规范操作
-  hackdir=`pwd`
-  if [ $hackdir == "/root/armbian/cache/sources/linux-mainline/linux-6.1.sdfy" ] ; then
-    display_alert "^^ hacking " "hackdir:${hackdir}" "info"
-    kerneltopdir="/root/armbian/cache/sources/linux-mainline/linux-6.1.y"
-    hackpatchdir="/root/armbian/patch/dev"
-    rm -rf $kerneltopdir/arch/arm64/boot/dts/rockchip
-#    rm -rf $kerneltopdir/arch/arm64/boot/dts/allwinner
-#    rm -rf $kerneltopdir/arch/arm64/boot/dts/amlogic
-    cp -a $hackpatchdir/dts/rockchip $kerneltopdir/arch/arm64/boot/dts/
-    cp -a $hackpatchdir/include $kerneltopdir/arch/arm64/boot/dts/
-    cp -a $hackpatchdir/Makefile.lib $kerneltopdir/scripts/Makefile.lib
-    cp -a $hackpatchdir/dtx_diff $kerneltopdir/scripts/dtc/dtx_diff
-#    cp -a $hackpatchdir/dt-bindings $kerneltopdir/include/
-
-    find $kerneltopdir -name dt-bindings
-    md5sum $hackpatchdir/Makefile.lib
-    md5sum $kerneltopdir/scripts/Makefile.lib
-    ls $kerneltopdir/arch/arm64/boot/dts/rockchip/*eaidk*
-    display_alert "^^ hacking 19:54 " "done" "info"
-  fi
+#  hackdir=`pwd`
+#  if [ $hackdir == "/root/armbian/cache/sources/linux-mainline/linux-6.1.sdfy" ] ; then
+#    display_alert "^^ hacking " "hackdir:${hackdir}" "info"
+#    kerneltopdir="/root/armbian/cache/sources/linux-mainline/linux-6.1.y"
+#    hackpatchdir="/root/armbian/patch/dev"
+#    rm -rf $kerneltopdir/arch/arm64/boot/dts/rockchip
+##    rm -rf $kerneltopdir/arch/arm64/boot/dts/allwinner
+##    rm -rf $kerneltopdir/arch/arm64/boot/dts/amlogic
+#    cp -a $hackpatchdir/dts/rockchip $kerneltopdir/arch/arm64/boot/dts/
+#    cp -a $hackpatchdir/include $kerneltopdir/arch/arm64/boot/dts/
+#    cp -a $hackpatchdir/Makefile.lib $kerneltopdir/scripts/Makefile.lib
+#    cp -a $hackpatchdir/dtx_diff $kerneltopdir/scripts/dtc/dtx_diff
+##    cp -a $hackpatchdir/dt-bindings $kerneltopdir/include/
+#
+#    find $kerneltopdir -name dt-bindings
+#    md5sum $hackpatchdir/Makefile.lib
+#    md5sum $kerneltopdir/scripts/Makefile.lib
+#    ls $kerneltopdir/arch/arm64/boot/dts/rockchip/*eaidk*
+#    display_alert "^^ hacking 19:54 " "done" "info"
+#  fi
 }
 
 # process_patch_file <file> <description>

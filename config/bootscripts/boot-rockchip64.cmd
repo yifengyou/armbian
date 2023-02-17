@@ -7,7 +7,9 @@ setenv load_addr "0x9000000"
 setenv overlay_error "false"
 # default values
 setenv rootdev "/dev/mmcblk0p1"
-setenv verbosity "1"
+# yifengyou: 修改verbosity=7，内核启动会有日志打印
+# setenv verbosity "1"
+setenv verbosity "7"
 setenv console "both"
 setenv bootlogo "false"
 setenv rootfstype "ext4"

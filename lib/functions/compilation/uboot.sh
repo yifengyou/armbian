@@ -83,10 +83,14 @@ compile_uboot() {
 			[[ $? -ne 0 ]] && exit_with_error "ATF binary not found"
 			rm -rf "${atftempdir}"
 		fi
-
+		echo " # yifengyou: fix localtime to Asia/Shanghai"
+		ln -svf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime || :
 		# yifengyou
 		display_alert "== u-boot make " "$BOOTCONFIG" "info"
 		echo -e "\n\t== u-boot make $BOOTCONFIG ==\n" >> "${DEST}"/${LOG_SUBPATH}/compilation.log
+		echo " # youyifeng: uboot.sh:90"
+		echo " #     CCACHE_BASEDIR=$(pwd) env PATH=${toolchain}:${toolchain2}:${PATH}"
+		echo " #         make $CTHREADS $BOOTCONFIG CROSS_COMPILE=$CCACHE $UBOOT_COMPILER"
 		eval CCACHE_BASEDIR="$(pwd)" env PATH="${toolchain}:${toolchain2}:${PATH}" \
 			'make $CTHREADS $BOOTCONFIG \
 			CROSS_COMPILE="$CCACHE $UBOOT_COMPILER"' \
@@ -94,7 +98,9 @@ compile_uboot() {
 			${OUTPUT_VERYSILENT:+' >/dev/null 2>/dev/null'} 2>> "${DEST}"/${LOG_SUBPATH}/compilation.log
 
 		# armbian specifics u-boot settings
-		[[ -f .config ]] && sed -i 's/CONFIG_LOCALVERSION=""/CONFIG_LOCALVERSION="-armbian"/g' .config
+		echo " # yifengyou: modify .config CONFIG_LOCALVERSION=-armbian_yyf"
+		[[ -f .config ]] && sed -i 's/CONFIG_LOCALVERSION=""/CONFIG_LOCALVERSION="-armbian_yyf"/g' .config
+		echo " # yifengyou: modify .config CONFIG_LOCALVERSION_AUTO is not set"
 		[[ -f .config ]] && sed -i 's/CONFIG_LOCALVERSION_AUTO=.*/# CONFIG_LOCALVERSION_AUTO is not set/g' .config
 
 		# for modern kernel and non spi targets
@@ -114,6 +120,7 @@ compile_uboot() {
 		[[ -f tools/logos/udoo.bmp ]] && cp "${SRC}"/packages/blobs/splash/udoo.bmp tools/logos/udoo.bmp
 		touch .scmversion
 
+		echo " # yifengyou: config bootdelay = $BOOTDELAY"
 		# $BOOTDELAY can be set in board family config, ensure autoboot can be stopped even if set to 0
 		[[ $BOOTDELAY == 0 ]] && echo -e "CONFIG_ZERO_BOOTDELAY_CHECK=y" >> .config
 		[[ -n $BOOTDELAY ]] && sed -i "s/^CONFIG_BOOTDELAY=.*/CONFIG_BOOTDELAY=${BOOTDELAY}/" .config || [[ -f .config ]] && echo "CONFIG_BOOTDELAY=${BOOTDELAY}" >> .config
@@ -123,6 +130,9 @@ compile_uboot() {
 		[[ -n $UBOOT_TOOLCHAIN2 ]] && cross_compile="ARMBIAN=foe" # empty parameter is not allowed
 
 		echo -e "\n\t== u-boot make $target_make ==\n" >> "${DEST}"/${LOG_SUBPATH}/compilation.log
+		echo " # yifengyou: uboot.sh:131"
+		echo "    CCACHE_BASEDIR=$(pwd) env PATH=${toolchain}:${toolchain2}:${PATH}"
+		echo "        make $target_make $CTHREADS ${cross_compile}"
 		eval CCACHE_BASEDIR="$(pwd)" env PATH="${toolchain}:${toolchain2}:${PATH}" \
 			'make $target_make $CTHREADS \
 			"${cross_compile}"' \
@@ -131,7 +141,8 @@ compile_uboot() {
 			${OUTPUT_VERYSILENT:+' >/dev/null 2>/dev/null'} ';EVALPIPE=(${PIPESTATUS[@]})' 2>> "${DEST}"/${LOG_SUBPATH}/compilation.log
 
 		[[ ${EVALPIPE[0]} -ne 0 ]] && exit_with_error "U-boot compilation failed"
-
+		# set -x
+		# yifengyou: 构建uboot.img idbloader.bin trust.bin
 		[[ $(type -t uboot_custom_postprocess) == function ]] && uboot_custom_postprocess
 
 		# copy files to build directory
@@ -184,6 +195,7 @@ compile_uboot() {
 	EOF
 
 	# set up control file
+	# yifengyou: 创建uboot debian包
 	cat <<- EOF > "$uboottempdir/${uboot_name}/DEBIAN/control"
 		Package: linux-u-boot-${BOARD}-${BRANCH}
 		Version: $REVISION
@@ -215,4 +227,6 @@ compile_uboot() {
 
 	rsync --remove-source-files -rq "$uboottempdir/${uboot_name}.deb" "${DEB_STORAGE}/"
 	rm -rf "$uboottempdir"
+	echo " # yifengyou: build uboot done!"
+	exit 0
 }

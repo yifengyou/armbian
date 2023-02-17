@@ -62,14 +62,17 @@ if [[ $BOOT_SOC == rk3328 ]]; then
 	BL31_BLOB='rk33/rk322xh_bl31_v1.44.elf'
 
 elif [[ $BOOT_SOC == rk3399 ]]; then
-
+	echo " # yifengyou: \$BOOT_SOC == rk3399"
 	BOOT_SCENARIO="${BOOT_SCENARIO:=only-blobs}"
 	if [[ $BOARD_NAME == "Tinker Board 2" ]]; then
 		DDR_BLOB="${DDR_BLOB:=rk33/rk3399_ddr_800MHz_v1.27.bin}"
 	else
+		echo " # yifengyou: \$DDR_BLOB == ${DDR_BLOB:=rk33/rk3399_ddr_933MHz_v1.25.bin}"
 		DDR_BLOB="${DDR_BLOB:=rk33/rk3399_ddr_933MHz_v1.25.bin}"
 	fi
+	echo " # MINILOADER_BLOB: rk33/rk3399_miniloader_v1.26.bin"
 	MINILOADER_BLOB='rk33/rk3399_miniloader_v1.26.bin'
+	echo " # BL31_BLOB: rk33/rk3399_bl31_v1.35.elf"
 	BL31_BLOB='rk33/rk3399_bl31_v1.35.elf'
 
 elif [[ $BOOT_SOC == rk3399pro ]]; then
@@ -179,19 +182,33 @@ prepare_boot_configuration() {
 }
 
 uboot_custom_postprocess() {
-
+	echo " # yifengyou: run uboot_custom_postprocess"
 	if [[ $BOOT_SCENARIO == "blobless" || $BOOT_SCENARIO == "tpl-spl-blob" ]]; then
 		:
 	elif [[ $BOOT_SCENARIO == "spl-blobs" || $BOOT_SCENARIO == "tpl-blob-atf-mainline" ]]; then
 
+		echo " # yifengyou: rockchip64_common.inc [`pwd`]"
+		echo " tools/mkimage -n $BOOT_SOC -T rksd -d $RKBIN_DIR/$DDR_BLOB:spl/u-boot-spl.bin idbloader.img"
 		tools/mkimage -n $BOOT_SOC -T rksd -d $RKBIN_DIR/$DDR_BLOB:spl/u-boot-spl.bin idbloader.img
 
 	elif [[ $BOOT_SCENARIO == "only-blobs" ]]; then
 
 		local tempfile=$(mktemp)
+
+		echo " # yifengyou: rockchip64_common.inc [`pwd`]"
+		echo " tools/mkimage -n $BOOT_SOC -T rksd -d $RKBIN_DIR/$DDR_BLOB idbloader.bin"
 		tools/mkimage -n $BOOT_SOC -T rksd -d $RKBIN_DIR/$DDR_BLOB idbloader.bin
+
+		echo " # yifengyou: rockchip64_common.inc [`pwd`]"
+		echo " cat $RKBIN_DIR/$MINILOADER_BLOB >> idbloader.bin"
 		cat $RKBIN_DIR/$MINILOADER_BLOB >> idbloader.bin
+
+		echo " # yifengyou: rockchip64_common.inc [`pwd`]"
+		echo " $PKG_PREFIX$RKBIN_DIR/tools/loaderimage --pack --uboot ./u-boot-dtb.bin uboot.img 0x200000"
 		$PKG_PREFIX$RKBIN_DIR/tools/loaderimage --pack --uboot ./u-boot-dtb.bin uboot.img 0x200000
+
+		echo " # yifengyou: rockchip64_common.inc [`pwd`]"
+		echo " $PKG_PREFIX$RKBIN_DIR/tools/trust_merger --replace bl31.elf $RKBIN_DIR/$BL31_BLOB trust.ini"
 		$PKG_PREFIX$RKBIN_DIR/tools/trust_merger --replace bl31.elf $RKBIN_DIR/$BL31_BLOB trust.ini
 
 	else
@@ -232,9 +249,14 @@ write_uboot_platform() {
 		dd if=$1/u-boot.itb of=$2 seek=16384 conv=notrunc status=none > /dev/null 2>&1
 
 	elif [[ -f $1/uboot.img ]]; then # $BOOT_SCENARIO == "only-blobs"
-
+		# dd if=/dev/mmcblk2 of=idbloader.bin bs=1 skip=64*512 count=217372 conv=notrunc status=none
+		# dd if=/dev/mmcblk2 of=trust.bin bs=1 skip=24576*512 count=4194304 conv=notrunc status=none
+		# dd if=/dev/mmcblk2 of=uboot.img bs=1 skip=16384*512 count=4194304 conv=notrunc status=none
+		echo "# yifengyou write idbloader.bin to $2 seek=64 conv=notrunc status=none"
 		dd if=$1/idbloader.bin of=$2 seek=64 conv=notrunc status=none > /dev/null 2>&1
+        echo "# yifengyou write uboot.img to $2 seek=16384 conv=notrunc status=none"
 		dd if=$1/uboot.img of=$2 seek=16384 conv=notrunc status=none > /dev/null 2>&1
+        echo "# yifengyou write trust.bin to $2  seek=24576 conv=notrunc status=none"
 		dd if=$1/trust.bin of=$2 seek=24576 conv=notrunc status=none > /dev/null 2>&1
 
 	else

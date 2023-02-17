@@ -33,6 +33,7 @@ write_uboot() {
 
 	# source platform install to read $DIR
 	source ${TEMP_DIR}/usr/lib/u-boot/platform_install.sh
+	echo " yifengyou: call write_uboot_platform to write idbloader.bin trust.bin uboot.img"
 	write_uboot_platform "${TEMP_DIR}${DIR}" "$loop"
 	[[ $? -ne 0 ]] && exit_with_error "U-boot bootloader failed to install" "@host"
 	rm -rf ${TEMP_DIR}
