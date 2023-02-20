@@ -198,24 +198,29 @@ uboot_custom_postprocess() {
 		echo " # yifengyou: rockchip64_common.inc [`pwd`]"
 		echo " tools/mkimage -n $BOOT_SOC -T rksd -d $RKBIN_DIR/$DDR_BLOB idbloader.bin"
 		tools/mkimage -n $BOOT_SOC -T rksd -d $RKBIN_DIR/$DDR_BLOB idbloader.bin
+		echo ""
 
 		echo " # yifengyou: rockchip64_common.inc [`pwd`]"
 		echo " cat $RKBIN_DIR/$MINILOADER_BLOB >> idbloader.bin"
 		cat $RKBIN_DIR/$MINILOADER_BLOB >> idbloader.bin
+		echo ""
 
 		echo " # yifengyou: rockchip64_common.inc [`pwd`]"
 		echo " $PKG_PREFIX$RKBIN_DIR/tools/loaderimage --pack --uboot ./u-boot-dtb.bin uboot.img 0x200000"
 		$PKG_PREFIX$RKBIN_DIR/tools/loaderimage --pack --uboot ./u-boot-dtb.bin uboot.img 0x200000
+		echo ""
 
 		echo " # yifengyou: rockchip64_common.inc [`pwd`]"
 		echo " $PKG_PREFIX$RKBIN_DIR/tools/trust_merger --replace bl31.elf $RKBIN_DIR/$BL31_BLOB trust.ini"
 		$PKG_PREFIX$RKBIN_DIR/tools/trust_merger --replace bl31.elf $RKBIN_DIR/$BL31_BLOB trust.ini
+		echo ""
 
 	else
 		echo "Unsupported u-boot processing configuration!"
 		exit 1
 	fi
 
+	# yifengyou: 如果用开源的SPL方案
 	if [[ $BOOT_SUPPORT_SPI == yes ]]; then
 		if [[ $BOARD == "rock-3a" ]] || [[ $BOARD == "rock-5b" ]] || [[ $BOARD == "orangepi5" ]]; then
 			dd if=/dev/zero of=rkspi_loader.img bs=1M count=0 seek=16
@@ -252,11 +257,17 @@ write_uboot_platform() {
 		# dd if=/dev/mmcblk2 of=idbloader.bin bs=1 skip=64*512 count=217372 conv=notrunc status=none
 		# dd if=/dev/mmcblk2 of=trust.bin bs=1 skip=24576*512 count=4194304 conv=notrunc status=none
 		# dd if=/dev/mmcblk2 of=uboot.img bs=1 skip=16384*512 count=4194304 conv=notrunc status=none
+
+		# idbloader 写入到64扇区
 		echo "# yifengyou write idbloader.bin to $2 seek=64 conv=notrunc status=none"
 		dd if=$1/idbloader.bin of=$2 seek=64 conv=notrunc status=none > /dev/null 2>&1
-        echo "# yifengyou write uboot.img to $2 seek=16384 conv=notrunc status=none"
+
+		# uboot.img 写入到 16384扇区
+		echo "# yifengyou write uboot.img to $2 seek=16384 conv=notrunc status=none"
 		dd if=$1/uboot.img of=$2 seek=16384 conv=notrunc status=none > /dev/null 2>&1
-        echo "# yifengyou write trust.bin to $2  seek=24576 conv=notrunc status=none"
+
+		# trust.bin 写入到 24576扇区
+		echo "# yifengyou write trust.bin to $2  seek=24576 conv=notrunc status=none"
 		dd if=$1/trust.bin of=$2 seek=24576 conv=notrunc status=none > /dev/null 2>&1
 
 	else

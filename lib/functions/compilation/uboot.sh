@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 compile_uboot() {
 	# not optimal, but extra cleaning before overlayfs_wrapper should keep sources directory clean
 	if [[ $CLEAN_LEVEL == *make* ]]; then
@@ -143,6 +144,7 @@ compile_uboot() {
 		[[ ${EVALPIPE[0]} -ne 0 ]] && exit_with_error "U-boot compilation failed"
 		# set -x
 		# yifengyou: 构建uboot.img idbloader.bin trust.bin
+		# config/sources/families/include/rockchip64_common.inc
 		[[ $(type -t uboot_custom_postprocess) == function ]] && uboot_custom_postprocess
 
 		# copy files to build directory
@@ -228,5 +230,5 @@ compile_uboot() {
 	rsync --remove-source-files -rq "$uboottempdir/${uboot_name}.deb" "${DEB_STORAGE}/"
 	rm -rf "$uboottempdir"
 	echo " # yifengyou: build uboot done!"
-	exit 0
+#	exit 0
 }
