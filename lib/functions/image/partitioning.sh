@@ -99,6 +99,7 @@ PRE_PREPARE_PARTITIONS
 
 	# stage: calculate rootfs size
 	export rootfs_size=$(du -sm $SDCARD/ | cut -f1) # MiB
+	# yifengyou: Current rootfs size 2156 MiB info
 	display_alert "Current rootfs size" "$rootfs_size MiB" "info"
 
 	call_extension_method "prepare_image_size" "config_prepare_image_size" << 'PREPARE_IMAGE_SIZE'
@@ -128,6 +129,7 @@ PREPARE_IMAGE_SIZE
 	fi
 
 	# stage: create blank image
+	# yifengyou: Creating blank image for rootfs 2936 MiB info
 	display_alert "Creating blank image for rootfs" "$sdsize MiB" "info"
 	if [[ $FAST_CREATE_IMAGE == yes ]]; then
 		truncate --size=${sdsize}M ${SDCARD}.raw # sometimes results in fs corruption, revert to previous know to work solution
@@ -137,6 +139,9 @@ PREPARE_IMAGE_SIZE
 	fi
 
 	# stage: create partition table
+	# yifengyou: 分区操作
+	# Device                                                                  Boot Start     End Sectors  Size     Id        Type
+	# Armbian_23.02.0-trunk_Eaidk-610_jammy_edge_6.1.12_gnome_desktop.img1    32768          6012927      5980160  2.9G 83   Linux
 	display_alert "Creating partitions" "${bootfs:+/boot: $bootfs }root: $ROOTFS_TYPE" "info"
 	if [[ "${USE_HOOK_FOR_PARTITION}" == "yes" ]]; then
 		{
@@ -224,7 +229,7 @@ PREPARE_IMAGE_SIZE
 	rm -f $SDCARD/etc/fstab
 	if [[ -n $rootpart ]]; then
 		local rootdevice="${LOOP}p${rootpart}"
-
+		# yfengyou: 是否使用LUKS加密磁盘
 		if [[ $CRYPTROOT_ENABLE == yes ]]; then
 			display_alert "Encrypting root partition with LUKS..." "cryptsetup luksFormat $rootdevice" ""
 			echo -n $CRYPTROOT_PASSPHRASE | cryptsetup luksFormat $CRYPTROOT_PARAMETERS $rootdevice -
@@ -235,12 +240,15 @@ PREPARE_IMAGE_SIZE
 		fi
 
 		check_loop_device "$rootdevice"
+		# Creating rootfs [ ext4 on /dev/loop4p1 ]
+		# yifengyou: 如何指定为xfs文件系统？
 		display_alert "Creating rootfs" "$ROOTFS_TYPE on $rootdevice"
 		mkfs.${mkfs[$ROOTFS_TYPE]} ${mkopts[$ROOTFS_TYPE]} ${mkopts_label[$ROOTFS_TYPE]:+${mkopts_label[$ROOTFS_TYPE]}"$ROOT_FS_LABEL"} $rootdevice >> "${DEST}"/${LOG_SUBPATH}/install.log 2>&1
 		[[ $ROOTFS_TYPE == ext4 ]] && tune2fs -o journal_data_writeback $rootdevice > /dev/null
 		if [[ $ROOTFS_TYPE == btrfs && $BTRFS_COMPRESSION != none ]]; then
 			local fscreateopt="-o compress-force=${BTRFS_COMPRESSION}"
 		fi
+		# yifengyou: 挂载分区
 		mount ${fscreateopt} $rootdevice $MOUNT/
 		# create fstab (and crypttab) entry
 		if [[ $CRYPTROOT_ENABLE == yes ]]; then

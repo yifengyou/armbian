@@ -104,6 +104,7 @@ PRE_INSTALL_DISTRIBUTION_SPECIFIC
 		display_alert "Starting FEL boot" "$BOARD" "info"
 		start_fel_boot
 	else
+		# yifengyou: lib/functions/image/partitioning.sh
 		prepare_partitions
 		# yifengyou: 创建image
 		# yifengyou: lib/functions/image/rootfs-to-image.sh
