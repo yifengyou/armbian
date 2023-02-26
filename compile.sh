@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#export PS4=':${BASH_SOURCE}:${LINENO}+'
+export PS4='+${BASH_SOURCE:+(${BASH_SOURCE##*/}${LINENO:+:$LINENO}):} ${FUNCNAME:+$FUNCNAME(): }'
+
+set -x
+
 # yifengyou: 打开全局调试，默认不建议打开，信息太大
 # set -x
 #
