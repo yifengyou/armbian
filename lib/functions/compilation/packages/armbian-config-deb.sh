@@ -66,8 +66,11 @@ compile_armbian-config() {
 
 	# Add development repository to keep rooling release of this tool
 	cat <<- END > ${tmp_dir}/${armbian_config_dir}/etc/apt/sources.list.d/armbian-config.list
-	deb [signed-by=/usr/share/keyrings/armbian.gpg] https://github.armbian.com/configng stable main
+	deb [trusted=yes] https://github.armbian.com/configng stable main
 	END
+
+	# yyf
+	cat ${tmp_dir}/${armbian_config_dir}/etc/apt/sources.list.d/armbian-config.list
 
 	dpkg_deb_build "${tmp_dir}/${armbian_config_dir}" "armbian-config"
 	done_with_temp_dir "${cleanup_id}" # changes cwd to "${SRC}" and fires the cleanup function early
